@@ -19,7 +19,6 @@ packages:
 exclude-packages:
   # already excluded in comps-sync-exclude-list
   - PackageKit-glib
-  - grubby
   # nothing in the tree would use these
   - tracker
   - tracker-miners

@@ -3,7 +3,7 @@ name: "Build Fedora Asahi Remix Atomic Desktops Bootable Container images"
 env:
   # RECOMMENDATION: Use a flattened naming scheme for GHCR clarity
   # See the "Tagging Strategy" section below for why.
-  REGISTRY_ROOT: "ghcr.io/${{ github.repository_owner }}"
+  REGISTRY_ROOT: "ghcr.io/vijayakumarravi"
 
 on:
   pull_request:

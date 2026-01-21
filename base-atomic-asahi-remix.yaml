@@ -6,7 +6,7 @@ include:
   - common.yaml
   - asahi-remix.yaml
 
-ref: fedora/rawhide/${basearch}/base-atomic-asahi-remix
+ref: fedora/42/${basearch}/base-atomic-asahi-remix
 rojig:
   name: fedora-base-atomic-asahi-remix
   summary: "Fedora Base Atomic Asahi Remix"
@@ -24,5 +24,5 @@ packages:
 
 # Kept in the leaf manifest as they are overwritten by Pungi in composes
 repos:
-  - fedora-43
-  - fedora-43-updates
+  - fedora-42
+  - fedora-42-updates

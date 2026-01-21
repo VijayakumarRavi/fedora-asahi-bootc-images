@@ -14,7 +14,7 @@ packages:
   - fprintd-pam
   - gdm
   - glib-networking
-  - glycin-thumbnailer
+  # - glycin-thumbnailer
   - gnome-backgrounds
   - gnome-bluetooth
   - gnome-browser-connector

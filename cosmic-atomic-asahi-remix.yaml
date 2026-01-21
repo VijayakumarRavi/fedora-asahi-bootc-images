@@ -2,13 +2,13 @@ variables:
   bootable_container: true
 
 include:
-  - silverblue-common.yaml
+  - cosmic-atomic-common.yaml
   - asahi-remix.yaml
 
-ref: fedora/42/${basearch}/silverblue-asahi-remix
+ref: fedora/42/${basearch}/cosmic-atomic-asahi-remix
 rojig:
-  name: fedora-silverblue-asahi-remix
-  summary: "Fedora Silverblue Asahi Remix"
+  name: fedora-cosmic-atomic-asahi-remix
+  summary: "Fedora COSMIC Atomic Asahi Remix"
   license: MIT
 
 # Kept in the leaf manifest as they are overwritten by Pungi in composes

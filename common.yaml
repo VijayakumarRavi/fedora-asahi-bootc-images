@@ -1,4 +1,4 @@
-releasever: 44
+releasever: 42
 automatic-version-prefix: "${releasever}.<date:%Y%m%d>"
 mutate-os-release: "${releasever}"
 
@@ -145,7 +145,6 @@ exclude-packages:
   - dnf
   - dnf-plugins-core
   # https://github.com/fedora-silverblue/issue-tracker/issues/517
-  - grubby
   - sdubby
   # Exclude Tk. We can not exclude Tcl as it is neeeded for usb_modeswitch
   - tk

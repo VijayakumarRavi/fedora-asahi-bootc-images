@@ -30,10 +30,6 @@ exclude_list:
     - dracut-config-rescue
     # Eh...you can install this in a priv container
     - parted
-    # https://bugzilla.redhat.com/show_bug.cgi?id=1452348
-    - grubby
-    # Colin says we also don't need grubby-deprecated
-    - grubby-deprecated
     # Why?
     - ncurses
   workstation-product:

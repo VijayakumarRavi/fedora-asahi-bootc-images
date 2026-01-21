@@ -177,12 +177,14 @@ packages:
   - tiwilink-firmware
   - toolbox
   - tree
+  - tmux
   - unzip
   - uresourced
   - usb_modeswitch
   - usbutils
   - util-linux
   - vim-minimal
+  - neovim
   - wget2-wget
   - which
   - whois
@@ -190,6 +192,8 @@ packages:
   - words
   - wpa_supplicant
   - zip
+  - zsh
+  - zoxide
   - zram-generator-defaults
 packages-x86_64:
   - alsa-sof-firmware

@@ -1,14 +1,17 @@
 # This is a justfile. See https://github.com/casey/just
 # This is only used for local development. The builds made on the Fedora
 # infrastructure are run via Pungi in a Koji runroot.
-
 # Set a default for some recipes
+
 default_variant := "silverblue"
 default_arch := "default"
+
 # Current default in Pungi
+
 force_nocache := "true"
 
 # Just doesn't have a native dict type, but quoted bash dictionary works fine
+
 pretty_names := '(
     [silverblue]="Silverblue"
     [silverblue-asahi-remix]="Silverblue Asahi Remix"
@@ -24,9 +27,11 @@ pretty_names := '(
     [base-atomic]="Base Atomic"
     [base-atomic-asahi-remix]="Base Atomic Asahi Remix"
     [cosmic-atomic]="COSMIC Atomic"
+    [cosmic-atomic-asahi-remix]="COSMIC Atomic Asahi Remix"
 )'
 
 # subset of the map from https://pagure.io/pungi-fedora/blob/main/f/general.conf
+
 volume_id_substitutions := '(
     [silverblue]="SB"
     [kinoite]="Kin"
@@ -42,6 +47,7 @@ volume_id_substitutions := '(
 )'
 
 # Define a retry function for use in recipes
+
 retry_function := '
 retry() {
     if [[ "${#}" -lt 3 ]]; then
@@ -79,7 +85,7 @@ sync:
         git clone https://pagure.io/fedora-comps.git
     fi
 
-    default_variant={{default_variant}}
+    default_variant={{ default_variant }}
     version="$(rpm-ostree compose tree --print-only --repo=repo ${default_variant}.yaml | jq -r '."mutate-os-release"')"
     ./comps-sync.py --save fedora-comps/comps-f${version}.xml.in
 
@@ -97,7 +103,7 @@ comps-sync:
         popd > /dev/null || exit 1
     fi
 
-    default_variant={{default_variant}}
+    default_variant={{ default_variant }}
     version="$(rpm-ostree compose tree --print-only --repo=repo ${default_variant}.yaml | jq -r '."mutate-os-release"')"
     ./comps-sync.py --save fedora-comps/comps-f${version}.xml.in
 
@@ -115,7 +121,7 @@ comps-sync-check:
         popd > /dev/null || exit 1
     fi
 
-    default_variant={{default_variant}}
+    default_variant={{ default_variant }}
     version="$(rpm-ostree compose tree --print-only --repo=repo ${default_variant}.yaml | jq -r '."mutate-os-release"')"
     ./comps-sync.py fedora-comps/comps-f${version}.xml.in
 
@@ -124,7 +130,7 @@ manifest variant=default_variant:
     #!/bin/bash
     set -euo pipefail
 
-    rpm-ostree compose tree --print-only --repo=repo {{variant}}.yaml
+    rpm-ostree compose tree --print-only --repo=repo {{ variant }}.yaml
 
 # Perform dependency resolution for a given variant (defaults to Silverblue)
 compose-dry-run variant=default_variant:
@@ -138,7 +144,7 @@ compose-dry-run variant=default_variant:
         popd > /dev/null || exit 1
     fi
 
-    rpm-ostree compose tree --unified-core --repo=repo --dry-run {{variant}}.yaml
+    rpm-ostree compose tree --unified-core --repo=repo --dry-run {{ variant }}.yaml
 
 # Alias/shortcut for compose-image command
 compose variant=default_variant: (compose-image variant)
@@ -148,8 +154,8 @@ compose-legacy variant=default_variant:
     #!/bin/bash
     set -euxo pipefail
 
-    declare -A pretty_names={{pretty_names}}
-    variant={{variant}}
+    declare -A pretty_names={{ pretty_names }}
+    variant={{ variant }}
     variant_pretty=${pretty_names[$variant]-}
     if [[ -z $variant_pretty ]]; then
         echo "Unknown variant"
@@ -179,7 +185,7 @@ compose-legacy variant=default_variant:
         "--cachedir=cache"
         "--unified-core"
     )
-    if [[ {{force_nocache}} == "true" ]]; then
+    if [[ {{ force_nocache }} == "true" ]]; then
         ARGS+=(" --force-nocache")
     fi
     CMD="rpm-ostree"
@@ -203,8 +209,8 @@ compose-image variant=default_variant:
     #!/bin/bash
     set -euxo pipefail
 
-    declare -A pretty_names={{pretty_names}}
-    variant={{variant}}
+    declare -A pretty_names={{ pretty_names }}
+    variant={{ variant }}
     variant_pretty=${pretty_names[$variant]-}
     if [[ -z $variant_pretty ]]; then
         echo "Unknown variant"
@@ -235,7 +241,7 @@ compose-image variant=default_variant:
         "--label=quay.expires-after=4w"
         "--max-layers=96"
     )
-    if [[ {{force_nocache}} == "true" ]]; then
+    if [[ {{ force_nocache }} == "true" ]]; then
         ARGS+=("--force-nocache")
     fi
     # To debug with gdb, use: gdb --args ...
@@ -270,9 +276,9 @@ lorax variant=default_variant:
     # Do not create the iso directory or lorax will fail
     mkdir -p tmp cache/lorax
 
-    declare -A pretty_names={{pretty_names}}
-    declare -A volume_id_substitutions={{volume_id_substitutions}}
-    variant={{variant}}
+    declare -A pretty_names={{ pretty_names }}
+    declare -A volume_id_substitutions={{ volume_id_substitutions }}
+    variant={{ variant }}
     variant_pretty=${pretty_names[$variant]-}
     volid_sub=${volume_id_substitutions[$variant]-}
     if [[ -z $variant_pretty ]] || [[ -z $volid_sub ]]; then
@@ -361,12 +367,12 @@ upload-container variant=default_variant arch=default_arch:
     #!/bin/bash
     set -euxo pipefail
 
-    {{retry_function}}
+    {{ retry_function }}
 
-    variant={{variant}}
-    arch={{arch}}
+    variant={{ variant }}
+    arch={{ arch }}
 
-    declare -A pretty_names={{pretty_names}}
+    declare -A pretty_names={{ pretty_names }}
     variant_pretty=${pretty_names[$variant]-}
     if [[ -z $variant_pretty ]]; then
         echo "Unknown variant"
@@ -448,11 +454,11 @@ multi-arch-manifest variant=default_variant:
     #!/bin/bash
     set -euxo pipefail
 
-    {{retry_function}}
+    {{ retry_function }}
 
-    variant={{variant}}
+    variant={{ variant }}
 
-    declare -A pretty_names={{pretty_names}}
+    declare -A pretty_names={{ pretty_names }}
     variant_pretty=${pretty_names[$variant]-}
     if [[ -z $variant_pretty ]]; then
         echo "Unknown variant"
