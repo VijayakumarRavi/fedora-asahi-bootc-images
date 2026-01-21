@@ -1,7 +1,9 @@
 name: "Build Fedora Asahi Remix Atomic Desktops Bootable Container images"
 
 env:
-  REGISTRY: "ghcri.io/bshephar/fedora-asahi-remix-atomic-desktops"
+  # RECOMMENDATION: Use a flattened naming scheme for GHCR clarity
+  # See the "Tagging Strategy" section below for why.
+  REGISTRY_ROOT: "ghcr.io/${{ github.repository_owner }}"
 
 on:
   pull_request:
@@ -10,15 +12,13 @@ on:
   push:
     branches:
       - main
-#  schedule:
-#    # At 02:00 every day
-#    - cron: '0 2 * * *'
   workflow_dispatch:
 
-permissions: read-all
+# CRITICAL: This is required to push to GHCR
+permissions:
+  contents: read
+  packages: write
 
-# Prevent multiple workflow runs from racing to ensure that pushes are made
-# sequentialy for the main branch. Also cancel in progress workflow runs.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -28,8 +28,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: ['43'] # These correlate to branch names
-        variant: ['silverblue']
+        version: ["43"]
+        variant: ["silverblue", "cosmic-atomic", "base-atomic"]
     runs-on: ubuntu-24.04-arm
     container:
       image: "quay.io/fedora-ostree-desktops/buildroot:${{ matrix.version }}"
@@ -47,23 +47,16 @@ jobs:
         run: |
           mkdir -p /github/home/.docker/
 
-      - name: 'Checkout GitHub Action'
-        uses: actions/checkout@main
-
-      - name: 'Login to GitHub Container Registry'
+      - name: Login to GitHub Container Registry
         uses: redhat-actions/podman-login@v1
         with:
           registry: ghcr.io
-          username: ${{github.actor}}
-          password: ${{secrets.GITHUB_TOKEN}}
-
-      - uses: sigstore/cosign-installer@v3.6.0
-        if: (github.event_name == 'push' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          auth_file_path: /tmp/auth.json # Essential so Skopeo can find it later
 
       - name: Checkout repo
         uses: actions/checkout@v4
-        with:
-          ref: ${{ matrix.version == 'rawhide' && 'main' || format('f{0}', matrix.version) }}
 
       - name: Get GPG keys for Asahi repos
         run: |
@@ -90,28 +83,26 @@ jobs:
               buildid="$(date '+%Y%m%d.0')"
               echo "${buildid}" > .buildid
           fi
+
+          # Extracts OS version (e.g., 41)
           version="$(rpm-ostree compose tree --print-only --repo=repo silverblue-asahi-remix.yaml | jq -r '."mutate-os-release"')"
+
+          # IMAGE NAME CONSTRUCTION
+          # This creates images like: ghcr.io/vijayakumarravi/fedora-asahi-silverblue:43
+          IMAGE_NAME="${REGISTRY_ROOT}/fedora-asahi-${VARIANT}"
+
           skopeo copy \
             --authfile /tmp/auth.json \
             --retry-times 3 \
             --dest-compress-format zstd \
             oci-archive:${VARIANT}-asahi-remix.ociarchive \
-            docker://${REGISTRY}/${VARIANT}:${version}.${buildid}
+            docker://${IMAGE_NAME}:${version}.${buildid}
+
           skopeo copy \
             --authfile /tmp/auth.json \
             --retry-times 3 \
             --dest-compress-format zstd \
-            docker://${REGISTRY}/${VARIANT}:${version}.${buildid} \
-            docker://${REGISTRY}/${VARIANT}:${version}
+            docker://${IMAGE_NAME}:${version}.${buildid} \
+            docker://${IMAGE_NAME}:${version}
         env:
-          VARIANT: ${{ matrix.variant }}
-
-      - name: Sign container image
-        if: (github.event_name == 'push' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
-        run: |
-          version="$(rpm-ostree compose tree --print-only --repo=repo silverblue-asahi-remix.yaml | jq -r '."mutate-os-release"')"
-          cosign sign -y --key env://COSIGN_PRIVATE_KEY ${{ env.REGISTRY }}/${VARIANT}:${version}
-        env:
-          COSIGN_EXPERIMENTAL: false
-          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
           VARIANT: ${{ matrix.variant }}
